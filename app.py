@@ -45,8 +45,11 @@ def encontrar_productos(file):
         return []
     # Read file
     df = pd.read_excel(file)
-    productosToSearch = df['Producto Solicitado (Usar menos de 80 Letras)'].tolist()
-    return productosToSearch
+    if 'Producto Solicitado (Usar menos de 80 Letras)' in df.columns:
+        productosToSearch = df['Producto Solicitado (Usar menos de 80 Letras)'].tolist()
+        return productosToSearch
+    else:
+        return []
 
 
 # Takes: File
@@ -70,6 +73,7 @@ def buscar_precios(productosToSearch):
 
 # Main page
 st.title('Buscador de precios')
+st.write('El archivo elegido debe tener la columna *Producto Solicitado (Usar menos de 80 Letras)* ')
 file =st.file_uploader('Porfavor escoja el archivo con los productos que desea encontrar', type=['xlsx'])
 
 productosToSearch=encontrar_productos(file)
