@@ -2,7 +2,7 @@ import pandas as pd
 
 # Currently supported domains
 accepted_domains=['plazavea.com.pe','sodimac.com.pe',
-'sodimac.falabella.com.pe','shopstar.pe', 'akl.com.pe','promelsa.com.pe','promart.pe']
+'sodimac.falabella.com.pe','shopstar.pe', 'akl.com.pe','promelsa.com.pe','promart.pe','listado.mercadolibre.com.pe']
 
 # Change headers so not recognized as bot
 headers = {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36'}

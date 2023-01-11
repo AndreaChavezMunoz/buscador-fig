@@ -79,6 +79,9 @@ class buscadorDeTiendas:
             elif self.domain =='promelsa.com.pe':
                 self.promelsa(soup)
 
+            elif self.domain=='listado.mercadolibre.com.pe':
+                self.mercado_libre(soup)
+
         # Unknown domain
         else:
             print('New domain:',self.domain)
@@ -264,7 +267,34 @@ class buscadorDeTiendas:
         self.price = precio
         self.brand = marca
 
+    def mercado_libre(self,htmlSoup):
+        # Assuming multiple products per page
+        productos = htmlSoup.find_all('div',{'class':'ui-search-result__wrapper shops__result-wrapper'})
+        productos_encontrados=[]
+        for item in productos:
+            nombre = item.find('a').text
+            link = item.find('a')['href']
+            precio =item.find('span',{'class':'price-tag-fraction'}).text
+            precio = float(precio.replace('.',''))
+            productos_encontrados.append({'Nombre':nombre,'Precio':precio,'Link':link})
+            
+        best_match = self.bestMatch(productos_encontrados)
+        self.url = best_match['Link']
 
+        # Get brand in new url
+        r=requests.get(self.url,headers=headers)
+        time.sleep(1)
+        htmlSoup = BeautifulSoup(r.text,"html.parser")
+        try:
+            marca = htmlSoup.find('span',{'class':'andes-table__column--value'}).text
+            marca = marca.lower()
+        except:
+            marca='Desconocida'
+
+        self.brand = marca
+        self.name = best_match['Nombre']
+        self.price = best_match['Precio']
+        
 
 
 
