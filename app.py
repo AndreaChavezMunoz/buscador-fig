@@ -13,11 +13,14 @@ def convert_df(df):
 # Returns: series of products and average prices
 @st.cache
 def price_summary(df_productos):
+    
     df_clean = df_productos.copy()
     df_clean.loc[df_clean["Precio"] == "Agotado", "Precio"] = pd.NA
     df_clean.loc[df_clean["Precio"] == "<NA>", "Precio"] = pd.NA
+    df_clean.dropna(inplace=True)
     df_clean["Precio"] = pd.to_numeric(df_clean["Precio"])
     df_summary = df_clean.groupby('Producto').apply(agg)
+
     return df_summary
     
 

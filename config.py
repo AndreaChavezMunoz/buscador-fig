@@ -9,8 +9,12 @@ headers = {'User-Agent':'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWe
 
 # Filltro
 def agg(g):
+    print('Here')
+    print(g)
     lowest_price = g['Precio'].min()
-    popular_brand = g['Marca'].value_counts().idxmax()
+    popular_brand = g['Marca'].value_counts()
+    print(popular_brand)
+    popular_brand=popular_brand.idxmax()
     lowest_price_brand = g[g['Precio']==lowest_price]['Marca'].unique()
     try:
         lowest_price_brand=lowest_price_brand[0]
