@@ -81,6 +81,9 @@ class buscadorDeTiendas:
 
             elif self.domain=='listado.mercadolibre.com.pe':
                 self.mercado_libre(soup)
+            
+            elif self.domain=='cahema.pe':
+                self.cahema(soup)
 
         # Unknown domain
         else:
@@ -281,6 +284,7 @@ class buscadorDeTiendas:
         best_match = self.bestMatch(productos_encontrados)
         self.url = best_match['Link']
 
+
         # Get brand in new url
         r=requests.get(self.url,headers=headers)
         time.sleep(1)
@@ -294,6 +298,47 @@ class buscadorDeTiendas:
         self.brand = marca
         self.name = best_match['Nombre']
         self.price = best_match['Precio']
+
+
+    def cahema(self,htmlSoup):
+        # If individual page
+        ending=self.url.split('.')
+        if ending[len(ending)-1] =='html':
+            nombre = htmlSoup.find('h1',{'class':'h2 product-name'}).text
+            precio= float(htmlSoup.find('div',{'class':'price'}).find('span')['content'])
+            marca = htmlSoup.find('div',{'class':'product-manufacturer'}).find('a').text
+        
+        # Multiple items per page
+        else:
+            productos = htmlSoup.find_all('div',{'class':'product-miniature-information'})
+            productos_encontrados=[]
+            for item in productos:
+
+                nombre = item.find('a').text
+                link = item.find('a')['href']
+                precio =item.find('span',{'class':'price'}).text
+                precio = float(precio.replace('S/.',''))
+                productos_encontrados.append({'Nombre':nombre,'Precio':precio,'Link':link})
+                
+            best_match = self.bestMatch(productos_encontrados)
+            self.url = best_match['Link']
+            nombre = best_match['Nombre']
+            precio = best_match['Precio']
+
+            # Get brand in new url
+            r=requests.get(self.url,headers=headers)
+            time.sleep(1)
+            htmlSoup = BeautifulSoup(r.text,"html.parser")
+            
+            marca = htmlSoup.find('div',{'class':'product-manufacturer'}).find('a').text
+            
+        marca = marca.lower()
+        self.brand = marca
+        self.name = nombre
+        self.price = precio
+        
+
+    
         
 
 
@@ -319,6 +364,6 @@ class buscadorDeTiendas:
                         matchIx=matchIx+1
             item['MatchScore']=matchIx
         
+        
         productsList=sorted(productsList,key=lambda e: (-e['MatchScore'], e['Precio']) )
-
         return productsList[0]
