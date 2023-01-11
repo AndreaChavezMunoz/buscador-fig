@@ -72,10 +72,6 @@ if len(productosToSearch)!=0:
     st.write('## Productos encontrados')
     st.dataframe(df_productos)
 
-    # Show summary of prices
-    st.write('## Resumen de precios')
-    summary_df = price_summary(df_productos)
-
     # Download data
     og_name =file.name.split('.')
     name_productos = 'BusquedaRapida_'+og_name[0]+'.csv'
@@ -88,6 +84,9 @@ if len(productosToSearch)!=0:
     )
 
 
+    # Show summary of prices
+    st.write('## Resumen de precios')
+    summary_df = price_summary(df_productos)
     if producto_to_show =='Todos':
         st.write(summary_df)
 
