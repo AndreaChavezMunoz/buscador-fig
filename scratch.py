@@ -1,5 +1,5 @@
 import pandas as pd
-from searchEngine import searchEngine, searchPrices
+from searchEngine import searchEngine, searchPrices,searchURLs
 from config import agg
 
 # # Test document
@@ -17,13 +17,23 @@ from config import agg
 # searchPrices(producto)
 
 
-#  Test summary
+#  Get new stores
 
-df_clean = pd.read_csv('/Users/chavezmunoz.a/Downloads/BusquedaRapida_Lista de Construcción UL777- FIGSAC.csv')
-df_clean.loc[df_clean["Precio"] == "Agotado", "Precio"] = pd.NA
-df_clean.loc[df_clean["Precio"] == "<NA>", "Precio"] = pd.NA
-df_clean.dropna(inplace=True)
-df_clean["Precio"] = pd.to_numeric(df_clean["Precio"])
+# # Get all urls
+# df = pd.read_excel('/Users/chavezmunoz.a/Downloads/Lista de Construcción UL777- FIGSAC.xlsx')
+# productosToSearch = df['Producto Solicitado (Usar menos de 80 Letras)'].tolist()
+# all_urls=[]
+# for p in productosToSearch:
+#     urls=searchURLs(p)
+#     all_urls=all_urls+urls
+# df=pd.DataFrame(all_urls)
+# df.to_csv('urls_found.csv',index=False)
 
-df_summary = df_clean.groupby('Producto').apply(agg)
+# # Select most frequent stores
+# df = pd.read_csv('urls_found.csv')
+# popular_stores=df['Dominio'].value_counts()#.nlargest(20)
+# print(popular_stores)
 
+# Test store
+urls=[{'Dominio':'listado.mercadolibre.com.pe','Link':'https://listado.mercadolibre.com.pe/dobladora-de-estribos-manual-telescopica','Producto':'Tubos para doblar estribos '}]
+df = searchPrices(urls)
