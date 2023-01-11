@@ -6,10 +6,8 @@ from stqdm import stqdm
 
 # Converts df to csv
 @st.cache
-def convert_df(df1, df2):
-    csv1= df1.to_csv().encode('utf-8')
-    csv2 = df2.to_csv().encode('utf-8')
-    return  csv1, csv2
+def convert_df(df):
+    return  df.to_csv().encode('utf-8')
 
 # Takes: df_productos(df of all products)
 # Returns: series of products and average prices
@@ -78,6 +76,18 @@ if len(productosToSearch)!=0:
     st.write('## Resumen de precios')
     summary_df = price_summary(df_productos)
 
+    # Download data
+    og_name =file.name.split('.')
+    name_productos = 'BusquedaRapida_'+og_name[0]+'.csv'
+    csv_productos = convert_df(df_productos)
+    st.download_button(
+        label="Descargar busqueda",
+        data=csv_productos,
+        file_name=name_productos,
+        mime='text/csv',
+    )
+
+
     if producto_to_show =='Todos':
         st.write(summary_df)
 
@@ -109,22 +119,9 @@ if len(productosToSearch)!=0:
         for p in proveedores.tolist():
             st.markdown("- " + p)
 
-    # Dowload data
-    st.write('## Descargar datos')
-
-    csv_productos, csv_resumen = convert_df(df_productos,summary_df)
     
-    og_name =file.name.split('.')
-    name_productos = 'BusquedaRapida_'+og_name[0]+'.csv'
+    csv_resumen=convert_df(summary_df)
     name_resumen = 'ResumennBusquedaRapida_'+og_name[0]+'.csv'
-
-    st.download_button(
-        label="Descargar busqueda",
-        data=csv_productos,
-        file_name=name_productos,
-        mime='text/csv',
-    )
-
     st.download_button(
         label="Descargar resumen",
         data=csv_resumen,
