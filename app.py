@@ -3,11 +3,24 @@ import pandas as pd
 from searchEngine import searchEngine
 from config import agg
 from stqdm import stqdm
+from io import BytesIO
+
 
 # Converts df to csv
 @st.cache
 def convert_df(df):
-    return  df.to_csv().encode('utf-8')
+    output = BytesIO()
+    writer = pd.ExcelWriter(output, engine='xlsxwriter')
+    df.to_excel(writer, index=False, sheet_name='Sheet1')
+    workbook = writer.book
+    worksheet = writer.sheets['Sheet1']
+    format1 = workbook.add_format({'num_format': '0.00'}) 
+    worksheet.set_column('A:A', None, format1)  
+    writer.save()
+    processed_data = output.getvalue()
+    return processed_data
+
+    #return  df.to_csv().encode('utf-8')
 
 # Takes: df_productos(df of all products)
 # Returns: series of products and average prices
@@ -77,7 +90,7 @@ if len(productosToSearch)!=0:
 
     # Download data
     og_name =file.name.split('.')
-    name_productos = 'BusquedaRapida_'+og_name[0]+'.csv'
+    name_productos = 'BusquedaRapida_'+og_name[0]+'.xlsx'
     csv_productos = convert_df(df_productos)
     st.download_button(
         label="Descargar busqueda",
@@ -123,7 +136,7 @@ if len(productosToSearch)!=0:
 
     
     csv_resumen=convert_df(summary_df)
-    name_resumen = 'ResumennBusquedaRapida_'+og_name[0]+'.csv'
+    name_resumen = 'ResumenBusquedaRapida_'+og_name[0]+'.xlsx'
     st.download_button(
         label="Descargar resumen",
         data=csv_resumen,
