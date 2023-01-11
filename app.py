@@ -11,7 +11,6 @@ from io import BytesIO
 def convert_df(df):
     output = BytesIO()
     writer = pd.ExcelWriter(output, engine='xlsxwriter')
-    df=df.reset_index()
     df.to_excel(writer, index=False, sheet_name='Sheet1')
     workbook = writer.book
     worksheet = writer.sheets['Sheet1']
@@ -140,6 +139,7 @@ if len(productosToSearch)!=0:
             st.markdown("- " + p)
 
     
+    summary_df=summary_df.reset_index()
     csv_resumen=convert_df(summary_df)
     name_resumen = 'ResumenBusquedaRapida_'+og_name[0]+'.xlsx'
     st.download_button(
