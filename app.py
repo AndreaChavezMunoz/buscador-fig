@@ -11,6 +11,7 @@ from io import BytesIO
 def convert_df(df):
     output = BytesIO()
     writer = pd.ExcelWriter(output, engine='xlsxwriter')
+    df=df.reset_index()
     df.to_excel(writer, index=False, sheet_name='Sheet1')
     workbook = writer.book
     worksheet = writer.sheets['Sheet1']
