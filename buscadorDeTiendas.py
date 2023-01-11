@@ -132,8 +132,8 @@ class buscadorDeTiendas:
                     precio = float(precio.replace('S/',''))
                     link = item.find('a',{'id':'title-pdp-link'})['href']
                     marca = item.find('div',{'class':'jsx-2974854745 product-brand'}).text
-                    productos_encontrados.append({'Nombre':nombre,'Precio':precio,'Link':link,'Marcha':marca})
-                
+                    productos_encontrados.append({'Nombre':nombre,'Precio':precio,'Link':link,'Marca':marca})
+                  
                 best_match = self.bestMatch(productos_encontrados)
                 nombre = best_match['Nombre']
                 precio = best_match['Precio']
@@ -153,17 +153,43 @@ class buscadorDeTiendas:
 
 
     def promart(self,htmlSoup):
+        
+        nombre = htmlSoup.find('h1',{'class':'ficha_name'})
+        
         # Assuming 1 element page
-        nombre = htmlSoup.find('h1',{'class':'ficha_name'}).find('div').text
+        if nombre != None:
+            nombre = nombre.find('div').text
 
-        precio = htmlSoup.find('input',{'id':'___rc-p-dv-id'})['value']
-        precio = float(precio.replace(',','.'))
-        if precio >=9999800:
-            precio = 'Agotado'
+            precio = htmlSoup.find('input',{'id':'___rc-p-dv-id'})['value']
+            precio = float(precio.replace(',','.'))
+            if precio >=9999800:
+                precio = 'Agotado'
 
-        marca=htmlSoup.find('div',{'class':'ficha_brand'}).find('a').text
+            marca=htmlSoup.find('div',{'class':'ficha_brand'}).find('a').text
+            
+
+        # Multiple page result
+        else:
+            # Encontrar todos los productos
+            productos = htmlSoup.find_all('div',{'class':'item-product product-listado'})
+            productos_encontrados=[]
+            for item in productos:
+                producto = item.find('div')
+                nombre = producto['data-name']
+                precio = producto['data-list-price']
+                precio = precio.replace(',','')
+                precio = float(precio.replace('S/',''))
+                link = producto.find('a')['href']
+                marca = item.find('div',{'class':'brand js-brand'}).find('p').text
+                productos_encontrados.append({'Nombre':nombre,'Precio':precio,'Link':link,'Marca':marca})
+                
+            best_match = self.bestMatch(productos_encontrados)
+            nombre = best_match['Nombre']
+            precio = best_match['Precio']
+            self.url = best_match['Link']
+            marca = best_match['Marca']
+
         marca = marca.lower()
-
         self.name = nombre
         self.price = precio
         self.brand = marca
@@ -197,8 +223,13 @@ class buscadorDeTiendas:
             precio = float(precio.replace('S/',''))
         except: # No hay oferta de interbank
             print('Shopstar: Sin oferta de Intrbank')
-            precio = htmlSoup.find('strong',{'class':'skuBestPrice'}).text
-            precio = float(precio.replace('S/.',''))
+            precio_case = htmlSoup.find('strong',{'class':'skuBestPrice'})
+            if precio_case != None:
+                precio = precio_case.text
+                precio = float(precio.replace('S/.',''))
+            else:
+                precio = pd.NA
+
 
         self.name = nombre
         self.price = precio
