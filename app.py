@@ -71,14 +71,14 @@ def buscar_precios(productosToSearch):
     return df_productos
 
 
-# Main page
+# Main page--------
 st.title('Buscador de precios')
 st.write('El archivo elegido debe tener la columna *Producto Solicitado (Usar menos de 80 Letras)* ')
 file =st.file_uploader('Porfavor escoja el archivo con los productos que desea encontrar', type=['xlsx'])
 
 productosToSearch=encontrar_productos(file)
 
-# Side bar
+# Side bar---------
 # Filter prices shown based on selection
 options = ['Todos']
 options.extend(productosToSearch)
@@ -86,7 +86,7 @@ producto_to_show =st.sidebar.selectbox('Productos mostrados',options)
 df_productos=buscar_precios(productosToSearch)
 
 
-
+# Once file has been uploaded -----------
 if len(productosToSearch)!=0:
     # Show results
     st.write('## Productos encontrados')
@@ -105,8 +105,12 @@ if len(productosToSearch)!=0:
 
 
     # Show summary of prices
-    st.write('## Resumen de precios')
     summary_df = price_summary(df_productos)
+    st.write(f"""## Resumen de precios
+    Productos encontrados: {len(summary_df)}/{len(productosToSearch)}
+    """)
+
+    
     if producto_to_show =='Todos':
         st.write(summary_df)
 
