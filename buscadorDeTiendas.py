@@ -5,7 +5,6 @@ from bs4 import BeautifulSoup
 import re 
 import time
 import pandas as pd
-from selenium import webdriver
 
 class buscadorDeTiendas:
 
