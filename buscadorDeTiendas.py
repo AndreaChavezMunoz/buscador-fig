@@ -118,7 +118,6 @@ class buscadorDeTiendas:
             t=self.url.split('/')
             # Assuming 1 element page
             if t[4] == 'product':
-                print(htmlSoup)
                 nombre=htmlSoup.find('h1',{'class':'jsx-4095377833 product-title'})
                 nombre = nombre.text
                 marca = htmlSoup.find('div',{'class':'jsx-4095377833 product-brand'}).text

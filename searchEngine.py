@@ -7,11 +7,10 @@ import pickle
 
 
 def searchEngine(productoToSearch):
-    print('Buscando...')
+    print('Buscando producto:', productoToSearch)
     urls = searchURLs(productoToSearch)
-    print('urls encontrados')
+    print('urls encontrados:', urls)
     info = searchPrices(urls)
-    print('Info encontrada')
     return info
 
 
@@ -25,7 +24,12 @@ def searchPrices(productosToSearch):
     product_info=[]
     for info in productosToSearch:
         buscador.newProduct(info)
-        buscador.findPrices()
+        try: # Find prices in website. If there is an error ignore it and go to next one
+            buscador.findPrices()
+        except:
+            print(f'Error encontrando producto {info}')
+            buscador.newProduct(info)
+            
         info = buscador.getItem()
         print(info)
         product_info.append(info)
