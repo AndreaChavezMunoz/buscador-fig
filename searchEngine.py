@@ -7,8 +7,11 @@ import pickle
 
 
 def searchEngine(productoToSearch):
+    print('Buscando...')
     urls = searchURLs(productoToSearch)
+    print('urls encontrados')
     info = searchPrices(urls)
+    print('Info encontrada')
     return info
 
 

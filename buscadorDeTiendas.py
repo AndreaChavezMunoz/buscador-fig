@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 import re 
 import time
 import pandas as pd
+from selenium import webdriver
 
 class buscadorDeTiendas:
 
@@ -52,7 +53,9 @@ class buscadorDeTiendas:
             print('Domain found:',self.domain)
             print(self.url)
 
-            # Get html
+            # # Get html
+            # self.driver.get(self.url)
+            # soup = BeautifulSoup(self.driver.page_source, 'html.parser')
             r=requests.get(self.url,headers=headers)
             time.sleep(1)
             soup = BeautifulSoup(r.text,"html.parser")
@@ -112,10 +115,12 @@ class buscadorDeTiendas:
         # If its actually falabella
         bool_falabella=htmlSoup.find('meta',{'name':'apple-mobile-web-app-title'})
         if not bool_falabella:
-            nombre=htmlSoup.find('h1',{'class':'jsx-4095377833 product-title'})
-            
+            print('actually sodimac')
+            t=self.url.split('/')
             # Assuming 1 element page
-            if nombre != None:
+            if t[4] == 'product':
+                print(htmlSoup)
+                nombre=htmlSoup.find('h1',{'class':'jsx-4095377833 product-title'})
                 nombre = nombre.text
                 marca = htmlSoup.find('div',{'class':'jsx-4095377833 product-brand'}).text
                 try:
@@ -289,6 +294,7 @@ class buscadorDeTiendas:
         r=requests.get(self.url,headers=headers)
         time.sleep(1)
         htmlSoup = BeautifulSoup(r.text,"html.parser")
+      
         try:
             marca = htmlSoup.find('span',{'class':'andes-table__column--value'}).text
             marca = marca.lower()
