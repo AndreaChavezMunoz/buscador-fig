@@ -4,6 +4,7 @@ import streamlit as st
 from googlesearch import search
 from urllib.parse import urlparse
 import pickle
+from config import user_agent
 
 
 def searchEngine(productoToSearch):
@@ -44,7 +45,7 @@ def searchURLs(productToSearch):
     allProducts = []
     
     # Find links with product
-    links_found= search(productToSearch, tld='com', lang='es', num=5, start=0, stop=5, pause=1.5, country='Peru')
+    links_found= search(productToSearch, tld='com', lang='es', num=5, start=0, stop=5, pause=1.5, country='Peru', user_agent=user_agent)
     
     # Find unique domains
     unique_domains = set()
