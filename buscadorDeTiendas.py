@@ -48,7 +48,7 @@ class buscadorDeTiendas:
     def findPrices(self):
 
         # If it is a known domain
-        if self.domain in accepted_domains: 
+        if self.domain in accepted_domains.keys(): 
             print('Domain found:',self.domain)
             print(self.url)
 
