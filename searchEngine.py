@@ -28,7 +28,6 @@ def searchPrices(productosToSearch):
             buscador.findPrices()
         except:
             print(f'Error encontrando producto {info}')
-            buscador.newProduct(info)
             
         info = buscador.getItem()
         print(info)
