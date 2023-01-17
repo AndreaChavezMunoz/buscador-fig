@@ -169,7 +169,7 @@ def buscar_precios(productosToSearch):
     st.write('Search starting')
     st.write(productosToSearch.index)
     st.write(range(3))
-    for i in stqdm(productosToSearch.index,desc="Buscando los mejores precios"):
+    for i in stqdm(range(len(productosToSearch.index)),desc="Buscando los mejores precios"):
         st.write('In loop')
         p=productosToSearch.at[i, 'Producto']
         n=productosToSearch.at[i,'Cantidad']
