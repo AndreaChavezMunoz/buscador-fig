@@ -5,10 +5,25 @@ from config import agg,accepted_domains
 from stqdm import stqdm
 from io import BytesIO
 
-
-# Converts df to csv
 @st.cache
-def convert_df(df):
+def df2csv(df):
+    return df.to_csv().encode('utf-8')
+
+@st.cache
+def df2xslx(df):
+    """
+    Return pandas.DataFrame as xlsx.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Data frame to be converted.
+
+    Return
+    ------
+    xlsx file
+        Same file.
+    """
     output = BytesIO()
     writer = pd.ExcelWriter(output, engine='xlsxwriter')
     df.to_excel(writer, index=False, sheet_name='Sheet1')
@@ -20,11 +35,22 @@ def convert_df(df):
     processed_data = output.getvalue()
     return processed_data
 
-    #return  df.to_csv().encode('utf-8')
-
-# Formato para carga masiva en sistema FIG
 @st.cache
 def format_carga_masiva(df_productos):
+    """
+    Return cleaned up version of data frame. 
+    Gets rid of non ASCII characters
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Data frame containing Precio, Producto, Nombre, Dominio, Cantidad.
+
+    Return
+    ------
+    pandas.DataFrame
+        File with no non-ASCII characters. Monedad added.
+    """
     df_clean = df_productos.copy()
     df_clean.loc[df_clean["Precio"] == "Agotado", "Precio"] = pd.NA
     df_clean.loc[df_clean["Precio"] == "<NA>", "Precio"] = pd.NA
@@ -43,8 +69,6 @@ def format_carga_masiva(df_productos):
     df_clean.rename(columns = {'Dominio':'Proveedor', 'Producto':'Producto Solicitado', 'Nombre':'Producto Ofrecido',
                               'Precio':'Costo x Unidad'}, inplace = True)
     df_clean['Moneda']='Soles'
-    df_clean['Cantidad']=0
-
    
     return df_clean
 
@@ -53,7 +77,26 @@ def format_carga_masiva(df_productos):
 # Returns: series of products and average prices
 @st.cache
 def price_summary(df_productos):
-    
+    """
+    Return summary of Precio of each Product based on Marca. 
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Data frame containing Precio, Producto, Marca.
+
+    Return
+    ------
+    pandas.DataFrame
+        Summary of Precios groupped by Producto.
+        precio_max: max price,
+        precio_promedio: average price,
+        precio_min: lowest price,
+        precio_min_marca: marca del precio mas bajo,
+        marca_popular: marca más encontrada,
+        marca_popular_min_price: precio minimo de la marca más encontrada,
+        marca_popular_avg_price: precio promedio de la marca más encontrada
+    """
     df_clean = df_productos.copy()
     df_clean.loc[df_clean["Precio"] == "Agotado", "Precio"] = pd.NA
     df_clean.loc[df_clean["Precio"] == "<NA>", "Precio"] = pd.NA
@@ -112,7 +155,6 @@ def buscar_precios(productosToSearch):
     pandas.DataFrame
         Products found online with domain, name, price, brand, link, and quantity.
     """
-    
     if len(productosToSearch)==0:
         return pd.DataFrame()
 
@@ -150,15 +192,27 @@ if len(productosToSearch_df)!=0:
     st.dataframe(df_productos)
 
     # Download data
+    # Complete
     og_name =file.name.split('.')
     name_productos = 'BusquedaRapida_'+og_name[0]+'.xlsx'
-    csv_productos = convert_df(df_productos)
+    xlsx_productos = df2xslx(df_productos)
     st.download_button(
         label="Descargar busqueda",
-        data=csv_productos,
+        data=xlsx_productos,
         file_name=name_productos,
+        mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    )
+    # Ready for carga masiva
+    name_carga_masiva='CargaMasiva_'+og_name[0]+'.csv'
+    formatted = format_carga_masiva(df_productos)
+    csv_carga_masiva = df2csv(formatted)
+    st.download_button(
+        label="Descargar carga masiva",
+        data=csv_carga_masiva,
+        file_name=name_carga_masiva,
         mime='text/csv',
     )
+
 
 
     # Show summary of prices
@@ -201,13 +255,13 @@ if len(productosToSearch_df)!=0:
 
     
     summary_df=summary_df.reset_index()
-    csv_resumen=convert_df(summary_df)
+    xlsx_resumen=df2xslx(summary_df)
     name_resumen = 'ResumenBusquedaRapida_'+og_name[0]+'.xlsx'
     st.download_button(
         label="Descargar resumen",
-        data=csv_resumen,
+        data=xlsx_resumen,
         file_name=name_resumen,
-        mime='text/csv',
+        mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     )
 
 

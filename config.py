@@ -17,7 +17,6 @@ headers = {'User-Agent':user_agent}
 
 # Filltro
 def agg(g):
-    print('Here')
     print(g)
     lowest_price = g['Precio'].min()
     popular_brand = g['Marca'].value_counts()
@@ -30,6 +29,7 @@ def agg(g):
         lowest_price_brand = None
    
     return pd.Series({
+        'precio_max':g['Precio'].max(),
         'precio_promedio': g['Precio'].mean(),
         'precio_min': lowest_price,
         'precio_min_marca': lowest_price_brand,
