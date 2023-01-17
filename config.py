@@ -1,7 +1,7 @@
 import pandas as pd
 
 # Debugging
-debugging=False
+debuggingStatus=False
 
 # Currently supported domains
 accepted_domains={'plazavea.com.pe':'Supermercados Peruanos Sociedad Anonima',
