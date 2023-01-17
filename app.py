@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from searchEngine import searchEngine
-from config import agg,accepted_domains,debuggingStatus
+from config import agg,accepted_domains
 from stqdm import stqdm
 from io import BytesIO
 
@@ -190,12 +190,9 @@ options.extend(productosToSearch_df["Producto"].values.tolist())
 producto_to_show =st.sidebar.selectbox('Productos mostrados',options)
 df_productos=buscar_precios(productosToSearch_df)
 
-if debuggingStatus == True:
-    df_productos = pd.read_excel('/Users/chavezmunoz.a/Downloads/BusquedaRapida_R2022-777- Listado de Ing.xlsx')
-
 
 # Once file has been uploaded -----------
-if len(productosToSearch_df)!=0 or debuggingStatus ==True:
+if len(productosToSearch_df)!=0:
     # Show results
     st.write('## Productos encontrados')
     st.dataframe(df_productos)
