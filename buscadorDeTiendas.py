@@ -22,10 +22,11 @@ class buscadorDeTiendas:
 
     # Updates item being search
     # Takes: item(pandas series or dictionary)
-    def newProduct(self, item):
+    def newProduct(self, item,n):
         self.product = item['Producto']
         self.domain = item['Dominio']
         self.url = item['Link']
+        self.n = n
         self.name = pd.NA  
         self.price = pd.NA  
         self.brand = pd.NA
@@ -38,7 +39,8 @@ class buscadorDeTiendas:
         'Nombre':self.name,
         'Precio': self.price,
         'Marca': self.brand,
-        'Link': self.url
+        'Link': self.url,
+        'Cantidad':self.n
         }
         return producto
 

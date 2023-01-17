@@ -7,11 +7,11 @@ import pickle
 from config import user_agent
 
 
-def searchEngine(productoToSearch):
+def searchEngine(productoToSearch,quantity):
     print('Buscando producto:', productoToSearch)
     urls = searchURLs(productoToSearch)
     print('urls encontrados:', urls)
-    info = searchPrices(urls)
+    info = searchPrices(urls,quantity)
     return info
 
 
@@ -19,12 +19,12 @@ buscador = buscadorDeTiendas()
 
 # Takes: list of dictionaries with product, link and domain
 # Retruns: List of dictionary with all product information
-def searchPrices(productosToSearch):
+def searchPrices(productosToSearch,quantity):
 
     # Webscrape each product
     product_info=[]
     for info in productosToSearch:
-        buscador.newProduct(info)
+        buscador.newProduct(info,quantity)
         try: # Find prices in website. If there is an error ignore it and go to next one
             buscador.findPrices()
         except:

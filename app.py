@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from searchEngine import searchEngine
-from config import agg
+from config import agg,accepted_domains
 from stqdm import stqdm
 from io import BytesIO
 
@@ -22,6 +22,33 @@ def convert_df(df):
 
     #return  df.to_csv().encode('utf-8')
 
+# Formato para carga masiva en sistema FIG
+@st.cache
+def format_carga_masiva(df_productos):
+    df_clean = df_productos.copy()
+    df_clean.loc[df_clean["Precio"] == "Agotado", "Precio"] = pd.NA
+    df_clean.loc[df_clean["Precio"] == "<NA>", "Precio"] = pd.NA
+    df_clean.dropna(inplace=True)
+    df_clean = df_clean.replace('ñ','n', regex=True)
+    df_clean = df_clean.replace('á','a', regex=True)
+    df_clean = df_clean.replace('é','e', regex=True)
+    df_clean = df_clean.replace('í','i', regex=True)
+    df_clean = df_clean.replace('ó','o', regex=True)
+    df_clean = df_clean.replace('ú','u', regex=True)
+    df_clean = df_clean.replace('"','', regex=True)
+    df_clean['Producto']=df_clean['Producto'].str.encode('ascii', 'ignore').str.decode('ascii')
+    df_clean['Nombre']=df_clean['Nombre'].str.encode('ascii', 'ignore').str.decode('ascii')
+    df_clean = df_clean.replace({"Dominio": accepted_domains})
+
+    df_clean.rename(columns = {'Dominio':'Proveedor', 'Producto':'Producto Solicitado', 'Nombre':'Producto Ofrecido',
+                              'Precio':'Costo x Unidad'}, inplace = True)
+    df_clean['Moneda']='Soles'
+    df_clean['Cantidad']=0
+
+   
+    return df_clean
+
+
 # Takes: df_productos(df of all products)
 # Returns: series of products and average prices
 @st.cache
@@ -36,26 +63,55 @@ def price_summary(df_productos):
 
     return df_summary
     
-
-# Reads file 
-# Returns: list of products to search (str)
 @st.cache
 def encontrar_productos(file):
+    """
+    Return the names and quantities of products in file.
+
+    Parameters
+    ----------
+    file : str
+        Location of excel file to be read by pandas.
+
+    Return
+    ------
+    pandas.DataFrame
+        Subset of the original DataFrame with names and quantities of products.
+    """
     if file is None:
-        return []
+        return pd.DataFrame(columns=['Producto','Cantidad'])
     # Read file
     df = pd.read_excel(file)
     if 'Producto Solicitado (Usar menos de 80 Letras)' in df.columns:
-        productosToSearch = df['Producto Solicitado (Usar menos de 80 Letras)'].tolist()
+
+        productosToSearch = df[['Producto Solicitado (Usar menos de 80 Letras)', 'Cantidad']]
+        # Change comas for periods
+        productosToSearch['Cantidad'] = productosToSearch['Cantidad'].str.replace(',','.')
+        productosToSearch['Cantidad'] = pd.to_numeric(productosToSearch["Cantidad"])
+        # Change column name to something smaller
+        productosToSearch.rename(columns = {'Producto Solicitado (Usar menos de 80 Letras)':'Producto'}, inplace = True)
         return productosToSearch
     else:
-        return []
+        return pd.DataFrame(columns=['Producto','Cantidad'])
 
 
-# Takes: File
+# Takes: dictionary with product name: quantity
 # Returns: Products found online and prices(df), product names used to search online (list)
 @st.experimental_memo
 def buscar_precios(productosToSearch):
+    """
+    Return the search results of all products.
+
+    Parameters
+    ----------
+    productosToSearch : pandas.DataFrame
+        Names and quantities of products.
+
+    Return
+    ------
+    pandas.DataFrame
+        Products found online with domain, name, price, brand, link, and quantity.
+    """
     
     if len(productosToSearch)==0:
         return pd.DataFrame()
@@ -63,8 +119,9 @@ def buscar_precios(productosToSearch):
     # Web scrape each product
     info_all = []
     for i in stqdm(range(len(productosToSearch)),desc="Buscando los mejores precios"):
-        p = productosToSearch[i]
-        info_found = searchEngine(p)
+        p=productosToSearch.at[i, 'Producto']
+        n=productosToSearch.at[i,'Cantidad']
+        info_found = searchEngine(p,n)
         info_all = info_all+info_found
     df_productos= pd.DataFrame(info_all)
 
@@ -76,18 +133,18 @@ st.title('Buscador de precios')
 st.write('El archivo elegido debe tener la columna *Producto Solicitado (Usar menos de 80 Letras)* ')
 file =st.file_uploader('Porfavor escoja el archivo con los productos que desea encontrar', type=['xlsx'])
 
-productosToSearch=encontrar_productos(file)
+productosToSearch_df=encontrar_productos(file)
 
 # Side bar---------
 # Filter prices shown based on selection
 options = ['Todos']
-options.extend(productosToSearch)
+options.extend(productosToSearch_df["Producto"].values.tolist())
 producto_to_show =st.sidebar.selectbox('Productos mostrados',options)
-df_productos=buscar_precios(productosToSearch)
+df_productos=buscar_precios(productosToSearch_df)
 
 
 # Once file has been uploaded -----------
-if len(productosToSearch)!=0:
+if len(productosToSearch_df)!=0:
     # Show results
     st.write('## Productos encontrados')
     st.dataframe(df_productos)
@@ -107,7 +164,7 @@ if len(productosToSearch)!=0:
     # Show summary of prices
     summary_df = price_summary(df_productos)
     st.write(f"""## Resumen de precios
-    Productos encontrados: {len(summary_df)}/{len(productosToSearch)}
+    Productos encontrados: {len(summary_df)}/{len(productosToSearch_df)}
     """)
 
     
@@ -153,6 +210,16 @@ if len(productosToSearch)!=0:
         mime='text/csv',
     )
 
+
+# # Add features 
+# else:
+#     st.write('## Productos cargados')
+#     df_productos=pd.read_excel('/Users/chavezmunoz.a/Downloads/BusquedaRapida_R2022-777- Listado de Ing.xlsx')
+#     st.dataframe(df_productos)
+
+#     st.write('Clean')
+#     formatted = format_carga_masiva(df_productos)
+#     st.dataframe(formatted)
 
 
 
