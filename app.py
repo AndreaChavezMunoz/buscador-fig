@@ -159,18 +159,16 @@ def buscar_precios(productosToSearch):
     pandas.DataFrame
         Products found online with domain, name, price, brand, link, and quantity.
     """
-    st.write(len(productosToSearch))
-
-    if len(productosToSearch)==0:
+    productos_n = len(productosToSearch.index)
+    st.write(productos_n)
+    if productos_n==0:
         return pd.DataFrame()
 
     # Web scrape each product
     info_all = []
     st.write('Search starting')
-    st.write(productosToSearch.index)
-    st.write(range(3))
-    st.write(range(len(productosToSearch.index)))
-    for i in stqdm(range(len(productosToSearch.index)),desc="Buscando los mejores precios"):
+    
+    for i in stqdm(range(productos_n),desc="Buscando los mejores precios"):
         st.write('In loop')
         p=productosToSearch.at[i, 'Producto']
         n=productosToSearch.at[i,'Cantidad']
