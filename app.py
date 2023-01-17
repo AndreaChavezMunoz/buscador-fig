@@ -5,6 +5,9 @@ from config import agg,accepted_domains
 from stqdm import stqdm
 from io import BytesIO
 
+# Debugging
+debugging=True
+
 @st.cache
 def df2csv(df):
     return df.to_csv().encode('utf-8')
@@ -100,6 +103,8 @@ def price_summary(df_productos):
     df_clean = df_productos.copy()
     df_clean.loc[df_clean["Precio"] == "Agotado", "Precio"] = pd.NA
     df_clean.loc[df_clean["Precio"] == "<NA>", "Precio"] = pd.NA
+    df_clean.loc[df_clean["Precio"] == "0", "Precio"] = pd.NA
+    df_clean.loc[df_clean["Precio"] == "nan", "Precio"] = pd.NA
     df_clean.dropna(inplace=True)
     df_clean["Precio"] = pd.to_numeric(df_clean["Precio"])
     df_summary = df_clean.groupby('Producto').apply(agg)
@@ -170,6 +175,8 @@ def buscar_precios(productosToSearch):
     return df_productos
 
 
+
+
 # Main page--------
 st.title('Buscador de precios')
 st.write('El archivo elegido debe tener la columna *Producto Solicitado (Usar menos de 80 Letras)* ')
@@ -184,16 +191,22 @@ options.extend(productosToSearch_df["Producto"].values.tolist())
 producto_to_show =st.sidebar.selectbox('Productos mostrados',options)
 df_productos=buscar_precios(productosToSearch_df)
 
+if debugging == True:
+    df_productos = pd.read_excel('/Users/chavezmunoz.a/Downloads/BusquedaRapida_R2022-777- Listado de Ing.xlsx')
+
 
 # Once file has been uploaded -----------
-if len(productosToSearch_df)!=0:
+if len(productosToSearch_df)!=0 or debugging ==True:
     # Show results
     st.write('## Productos encontrados')
     st.dataframe(df_productos)
 
     # Download data
     # Complete
-    og_name =file.name.split('.')
+    if file != None:
+        og_name =file.name.split('.')
+    else:
+        og_name = 'debugging'
     name_productos = 'BusquedaRapida_'+og_name[0]+'.xlsx'
     xlsx_productos = df2xslx(df_productos)
     st.download_button(
@@ -265,15 +278,6 @@ if len(productosToSearch_df)!=0:
     )
 
 
-# # Add features 
-# else:
-#     st.write('## Productos cargados')
-#     df_productos=pd.read_excel('/Users/chavezmunoz.a/Downloads/BusquedaRapida_R2022-777- Listado de Ing.xlsx')
-#     st.dataframe(df_productos)
-
-#     st.write('Clean')
-#     formatted = format_carga_masiva(df_productos)
-#     st.dataframe(formatted)
 
 
 
