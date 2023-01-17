@@ -167,7 +167,8 @@ def buscar_precios(productosToSearch):
     # Web scrape each product
     info_all = []
     st.write('Search starting')
-    for i in stqdm(range(len(productosToSearch)),desc="Buscando los mejores precios"):
+    st.write(productosToSearch)
+    for i in stqdm(productosToSearch.index,desc="Buscando los mejores precios"):
         st.write('In loop')
         p=productosToSearch.at[i, 'Producto']
         n=productosToSearch.at[i,'Cantidad']
