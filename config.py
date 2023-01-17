@@ -1,5 +1,8 @@
 import pandas as pd
 
+# Debugging
+debugging=False
+
 # Currently supported domains
 accepted_domains={'plazavea.com.pe':'Supermercados Peruanos Sociedad Anonima',
     'sodimac.com.pe':'Sodimac Peru S.A.',

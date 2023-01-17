@@ -280,10 +280,17 @@ class buscadorDeTiendas:
         productos = htmlSoup.find_all('div',{'class':'ui-search-result__wrapper shops__result-wrapper'})
         productos_encontrados=[]
         for item in productos:
-            nombre = item.find('a').text
-            link = item.find('a')['href']
-            precio =item.find('span',{'class':'price-tag-fraction'}).text
-            precio = float(precio.replace('.',''))
+            titulo = item.find('div',{'class':'ui-search-item__group ui-search-item__group--title shops__items-group'})
+            nombre = titulo.find('a')['title']
+            link = titulo.find('a')['href']
+            entero =item.find('span',{'class':'price-tag-fraction'}).text
+            entero=entero.replace('.','')
+            centavos = item.find('span',{'class':'price-tag-cents'})
+            if centavos == None:
+                centavos = '0'
+            else:
+                centavos = centavos.text
+            precio = float(entero+'.'+centavos)
             productos_encontrados.append({'Nombre':nombre,'Precio':precio,'Link':link})
             
         best_match = self.bestMatch(productos_encontrados)

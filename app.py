@@ -1,12 +1,10 @@
 import streamlit as st
 import pandas as pd
 from searchEngine import searchEngine
-from config import agg,accepted_domains
+from config import agg,accepted_domains,debugging
 from stqdm import stqdm
 from io import BytesIO
 
-# Debugging
-debugging=True
 
 @st.cache
 def df2csv(df):
@@ -134,6 +132,7 @@ def encontrar_productos(file):
 
         productosToSearch = df[['Producto Solicitado (Usar menos de 80 Letras)', 'Cantidad']]
         # Change comas for periods
+        productosToSearch['Cantidad']=productosToSearch['Cantidad'].astype(str)
         productosToSearch['Cantidad'] = productosToSearch['Cantidad'].str.replace(',','.')
         productosToSearch['Cantidad'] = pd.to_numeric(productosToSearch["Cantidad"])
         # Change column name to something smaller
