@@ -1,10 +1,10 @@
 import streamlit as st
 import pandas as pd
-from searchEngine import searchEngine
+from searchEngine import SearchEngine
 from config import agg,accepted_domains
 from stqdm import stqdm
 from io import BytesIO
-import pickle
+
 
 @st.cache
 def df2csv(df):
@@ -141,7 +141,7 @@ def encontrar_productos(file):
     else:
         return pd.DataFrame(columns=['Nombre de producto Solicitado','Cantidad'])
 
-
+search = SearchEngine()
 # Takes: dictionary with product name: quantity
 # Returns: Products found online and prices(df), product names used to search online (list)
 @st.experimental_memo
@@ -170,18 +170,14 @@ def buscar_precios(productosToSearch):
         p=productosToSearch.at[i, 'Nombre de producto Solicitado']
         n=productosToSearch.at[i,'Cantidad Solicitada']
         t=productosToSearch.at[i,'Producto Solicitado'] # TRAZA
-        info_found = searchEngine(p,n,t)
+        info_found = search.search_engine(p,n,t)
         if info_all is None:
             info_all = info_found
-            # open a file, where you ant to store the data
-            file = open('important', 'wb')
-
-            # dump information to that file
-            pickle.dump(info_found, file)
+        
             
         else:
             info_all=info_all.append(info_found)
-            pickle.dump(info_found, file)
+
     # close the file
     file.close()
     
