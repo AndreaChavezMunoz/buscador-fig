@@ -17,10 +17,10 @@ accepted_domains={'plazavea.com.pe':'Supermercados Peruanos Sociedad Anonima',
 
 # Change headers so not recognized as bot
 # user_agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.4 Safari/605.1.15'
-file = open('UserAgents.csv', "r")
-user_agent_list = list(csv.reader(file, delimiter=","))
-file.close()
-user_agent = random.choice(user_agent_list)[0]
+
+df = pd.read_csv('UserAgents.csv')
+user_agent_list = df.squeeze()
+user_agent = user_agent_list.sample().values[0]
 
 headers = {'User-Agent':user_agent}
 

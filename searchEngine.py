@@ -3,7 +3,6 @@ import streamlit as st
 from googlesearch import search
 from urllib.parse import urlparse
 from config import user_agent_list
-import random
 
 from buscadorDeTiendas import buscadorDeTiendas
 
@@ -21,7 +20,7 @@ class SearchEngine:
     def __init__(self):
         """Initialize SearchEngine object."""
         self.buscador = buscadorDeTiendas()
-        self.user_agent = random.choice(user_agent_list)[0]
+        self.user_agent = user_agent_list.sample().values[0]
 
     def search_URLs(self, product_to_search):
         """
@@ -37,7 +36,7 @@ class SearchEngine:
         list of dictionaries
             List of dictionaries with product searched, link, and domain.
         """
-        while True:
+        for n in range(3):
             # Select a random user agent from user_agent_list
             print('User agent:', self.user_agent)
 
@@ -50,6 +49,7 @@ class SearchEngine:
                 unique_domains = set()
                 all_links = []
                 for url in links_found:
+                    print('url ',url)
                     all_links.append(url)
                     uri = urlparse(url)
                     dom = uri.netloc or uri.path
@@ -57,8 +57,8 @@ class SearchEngine:
 
             except Exception as e:
                 print(e)
-                self.user_agent = random.choice(user_agent_list)[0]
-                pass
+                self.user_agent = user_agent_list.sample().values[0]
+                continue
 
             else:
                 # Select urls in unique domain
@@ -69,6 +69,9 @@ class SearchEngine:
                             break
 
                 return all_products
+
+            return None 
+
 
     def search_prices(self, products_to_search):
         """
@@ -121,12 +124,15 @@ class SearchEngine:
         print('Buscando producto:', product_to_search)
         urls = self.search_URLs(product_to_search)
         print('urls encontrados:', urls)
-        info = self.search_prices(urls)
-        
-        # add quantity and traza
-        df_info= pd.DataFrame(info)
-        df_info['Cantidad']=quantity
-        df_info['Producto Solicitado']= traza
-        return df_info
+        if urls is not None:
+            info = self.search_prices(urls)
+            
+            # add quantity and traza
+            df_info= pd.DataFrame(info)
+            df_info['Cantidad']=quantity
+            df_info['Producto Solicitado']= traza
+            return df_info
+        else:
+            return pd.DataFrame()
 
 

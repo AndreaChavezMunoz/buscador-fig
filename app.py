@@ -53,8 +53,8 @@ def format_carga_masiva(df_productos):
         File with no non-ASCII characters. Monedad added.
     """
     df_clean = df_productos.copy()
-    df_clean.loc[df_clean["Precio"] == "Agotado", "Precio"] = pd.NA
-    df_clean.loc[df_clean["Precio"] == "<NA>", "Precio"] = pd.NA
+    df_clean.loc[df_clean["Costo x Unidad"] == "Agotado", "Costo x Unidad"] = pd.NA
+    df_clean.loc[df_clean["Costo x Unidad"] == "<NA>", "Costo x Unidad"] = pd.NA
     df_clean.dropna(inplace=True)
     df_clean = df_clean.replace('ñ','n', regex=True)
     df_clean = df_clean.replace('á','a', regex=True)
@@ -63,13 +63,11 @@ def format_carga_masiva(df_productos):
     df_clean = df_clean.replace('ó','o', regex=True)
     df_clean = df_clean.replace('ú','u', regex=True)
     df_clean = df_clean.replace('"','', regex=True)
-    df_clean['Producto']=df_clean['Producto'].str.encode('ascii', 'ignore').str.decode('ascii')
-    df_clean['Nombre']=df_clean['Nombre'].str.encode('ascii', 'ignore').str.decode('ascii')
+    df_clean['Nombre de producto Solicitado']=df_clean['Nombre de producto Solicitado'].str.encode('ascii', 'ignore').str.decode('ascii')
+    df_clean['Producto Ofrecido']=df_clean['Producto Ofrecido'].str.encode('ascii', 'ignore').str.decode('ascii')
     df_clean = df_clean.replace({"Dominio": accepted_domains})
 
-    df_clean.rename(columns = {'Dominio':'Proveedor', 'Producto':'Producto Solicitado', 'Nombre':'Producto Ofrecido',
-                              'Precio':'Costo x Unidad'}, inplace = True)
-    df_clean['Moneda']='Soles'
+    df_clean['U. Medida']='Unidad'
    
     return df_clean
 
@@ -99,13 +97,13 @@ def price_summary(df_productos):
         marca_popular_avg_price: precio promedio de la marca más encontrada
     """
     df_clean = df_productos.copy()
-    df_clean.loc[df_clean["Precio"] == "Agotado", "Precio"] = pd.NA
-    df_clean.loc[df_clean["Precio"] == "<NA>", "Precio"] = pd.NA
-    df_clean.loc[df_clean["Precio"] == "0", "Precio"] = pd.NA
-    df_clean.loc[df_clean["Precio"] == "nan", "Precio"] = pd.NA
+    df_clean.loc[df_clean["Costo x Unidad"] == "Agotado", "Costo x Unidad"] = pd.NA
+    df_clean.loc[df_clean["Costo x Unidad"] == "<NA>", "Costo x Unidad"] = pd.NA
+    df_clean.loc[df_clean["Costo x Unidad"] == "0", "Costo x Unidad"] = pd.NA
+    df_clean.loc[df_clean["Costo x Unidad"] == "nan", "Costo x Unidad"] = pd.NA
     df_clean.dropna(inplace=True)
-    df_clean["Precio"] = pd.to_numeric(df_clean["Precio"])
-    df_summary = df_clean.groupby('Producto').apply(agg)
+    df_clean["Costo x Unidad"] = pd.to_numeric(df_clean["Costo x Unidad"])
+    df_summary = df_clean.groupby('Nombre de producto Solicitado').apply(agg)
 
     return df_summary
     
@@ -176,7 +174,7 @@ def buscar_precios(productosToSearch):
         
             
         else:
-            info_all=info_all.append(info_found)
+            info_all=pd.concat([info_all,info_found], ignore_index=True)
 
     # close the file
     file.close()
@@ -188,7 +186,7 @@ def buscar_precios(productosToSearch):
 
 # Main page--------
 st.title('Buscador de precios')
-st.write('El archivo elegido debe tener la columna *Producto Solicitado (Usar menos de 80 Letras)* ')
+st.write('Máximo 30 productos por busqueda')
 file =st.file_uploader('Porfavor escoja el archivo con los productos que desea encontrar', type=['xlsx'])
 
 productosToSearch_df=encontrar_productos(file)
@@ -199,7 +197,7 @@ options = ['Todos']
 options.extend(productosToSearch_df["Nombre de producto Solicitado"].values.tolist())
 producto_to_show =st.sidebar.selectbox('Productos mostrados',options)
 df_productos=buscar_precios(productosToSearch_df)
-
+print(df_productos)
 
 # Once file has been uploaded -----------
 if len(productosToSearch_df)!=0:
@@ -268,12 +266,12 @@ if len(productosToSearch_df)!=0:
 
         # Link de proveedores
         st.write('#### Posibles proveedores encontrados en:')
-        proveedores =df_productos[df_productos['Producto']==producto_to_show]['Link']
+        proveedores =df_productos[df_productos['Nombre de producto Solicitado']==producto_to_show]['Link']
         for p in proveedores.tolist():
             st.markdown("- " + p)
 
     
-    summary_df=summary_df.reset_index()
+    #summary_df=summary_df.reset_index()
     xlsx_resumen=df2xslx(summary_df)
     name_resumen = 'ResumenBusquedaRapida_'+og_name[0]+'.xlsx'
     st.download_button(

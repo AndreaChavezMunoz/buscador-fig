@@ -37,7 +37,7 @@ class buscadorDeTiendas:
         productoEncontrado = self.name
         if self.brand is not None:
             productoEncontrado = productoEncontrado + ' Marca: ' + self.brand
-        producto = {'Producto':self.product,
+        producto = {'Nombre de producto Solicitado':self.product,
         'Dominio':self.domain,
         'Producto Ofrecido': productoEncontrado,
         'Costo x Unidad': self.price,
