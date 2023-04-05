@@ -4,7 +4,7 @@ from searchEngine import searchEngine
 from config import agg,accepted_domains
 from stqdm import stqdm
 from io import BytesIO
-
+import pickle
 
 @st.cache
 def df2csv(df):
@@ -125,21 +125,21 @@ def encontrar_productos(file):
         Subset of the original DataFrame with names and quantities of products.
     """
     if file is None:
-        return pd.DataFrame(columns=['Producto','Cantidad'])
+        return pd.DataFrame(columns=['Nombre de producto Solicitado','Cantidad'])
     # Read file
     df = pd.read_excel(file)
-    if 'Producto Solicitado (Usar menos de 80 Letras)' in df.columns:
+    if 'Nombre de producto Solicitado' in df.columns:
 
-        productosToSearch = df[['Producto Solicitado (Usar menos de 80 Letras)', 'Cantidad']]
-        # Change comas for periods
-        productosToSearch['Cantidad']=productosToSearch['Cantidad'].astype(str)
-        productosToSearch['Cantidad'] = productosToSearch['Cantidad'].str.replace(',','.')
-        productosToSearch['Cantidad'] = pd.to_numeric(productosToSearch["Cantidad"])
-        # Change column name to something smaller
-        productosToSearch.rename(columns = {'Producto Solicitado (Usar menos de 80 Letras)':'Producto'}, inplace = True)
+        productosToSearch = df[['Producto Solicitado','Nombre de producto Solicitado', 'Cantidad Solicitada']]
+        # # Change comas for periods
+        # productosToSearch['Cantidad Solicitada']=productosToSearch['Cantidad Solicitada'].astype(str)
+        # productosToSearch['Cantidad Solicitada'] = productosToSearch['Cantidad Solicitada'].str.replace(',','.')
+        # productosToSearch['Cantidad Solicitada'] = pd.to_numeric(productosToSearch["Cantidad Solicitada"])
+        # # Change column name to something smaller
+        # productosToSearch.rename(columns = {'Producto Solicitado (Usar menos de 80 Letras)':'Producto'}, inplace = True)
         return productosToSearch
     else:
-        return pd.DataFrame(columns=['Producto','Cantidad'])
+        return pd.DataFrame(columns=['Nombre de producto Solicitado','Cantidad'])
 
 
 # Takes: dictionary with product name: quantity
@@ -164,16 +164,28 @@ def buscar_precios(productosToSearch):
         return pd.DataFrame()
 
     # Web scrape each product
-    info_all = []
+    info_all = None
     
     for i in stqdm(range(productos_n),desc="Buscando los mejores precios"):
-        p=productosToSearch.at[i, 'Producto']
-        n=productosToSearch.at[i,'Cantidad']
-        info_found = searchEngine(p,n)
-        info_all = info_all+info_found
-    df_productos= pd.DataFrame(info_all)
+        p=productosToSearch.at[i, 'Nombre de producto Solicitado']
+        n=productosToSearch.at[i,'Cantidad Solicitada']
+        t=productosToSearch.at[i,'Producto Solicitado'] # TRAZA
+        info_found = searchEngine(p,n,t)
+        if info_all is None:
+            info_all = info_found
+            # open a file, where you ant to store the data
+            file = open('important', 'wb')
 
-    return df_productos
+            # dump information to that file
+            pickle.dump(info_found, file)
+            
+        else:
+            info_all=info_all.append(info_found)
+            pickle.dump(info_found, file)
+    # close the file
+    file.close()
+    
+    return info_all
 
 
 
@@ -188,7 +200,7 @@ productosToSearch_df=encontrar_productos(file)
 # Side bar---------
 # Filter prices shown based on selection
 options = ['Todos']
-options.extend(productosToSearch_df["Producto"].values.tolist())
+options.extend(productosToSearch_df["Nombre de producto Solicitado"].values.tolist())
 producto_to_show =st.sidebar.selectbox('Productos mostrados',options)
 df_productos=buscar_precios(productosToSearch_df)
 

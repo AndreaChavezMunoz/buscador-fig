@@ -22,25 +22,27 @@ class buscadorDeTiendas:
 
     # Updates item being search
     # Takes: item(pandas series or dictionary)
-    def newProduct(self, item,n):
+    def newProduct(self, item):
         self.product = item['Producto']
         self.domain = item['Dominio']
         self.url = item['Link']
-        self.n = n
+        #self.n = n
         self.name = pd.NA  
         self.price = pd.NA  
-        self.brand = pd.NA
+        self.brand = None
 
 
     # Returns info 
     def getItem(self):
+        productoEncontrado = self.name
+        if self.brand is not None:
+            productoEncontrado = productoEncontrado + ' Marca: ' + self.brand
         producto = {'Producto':self.product,
         'Dominio':self.domain,
-        'Nombre':self.name,
-        'Precio': self.price,
-        'Marca': self.brand,
-        'Link': self.url,
-        'Cantidad':self.n
+        'Producto Ofrecido': productoEncontrado,
+        'Costo x Unidad': self.price,
+        'Link': self.url
+        #'Cantidad':self.n
         }
         return producto
 
