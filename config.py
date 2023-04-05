@@ -27,23 +27,23 @@ headers = {'User-Agent':user_agent}
 # Filltro
 def agg(g):
     print(g)
-    lowest_price = g['Precio'].min()
+    lowest_price = g['Costo x Unidad'].min()
     popular_brand = g['Marca'].value_counts()
     print(popular_brand)
     popular_brand=popular_brand.idxmax()
-    lowest_price_brand = g[g['Precio']==lowest_price]['Marca'].unique()
+    lowest_price_brand = g[g['Costo x Unidad']==lowest_price]['Marca'].unique()
     try:
         lowest_price_brand=lowest_price_brand[0]
     except:
         lowest_price_brand = None
    
     return pd.Series({
-        'precio_max':g['Precio'].max(),
-        'precio_promedio': g['Precio'].mean(),
+        'precio_max':g['Costo x Unidad'].max(),
+        'precio_promedio': g['Costo x Unidad'].mean(),
         'precio_min': lowest_price,
         'precio_min_marca': lowest_price_brand,
         'marca_popular':popular_brand,
-        'marca_popular_min_price':g[g['Marca']==popular_brand]['Precio'].min(),
-        'marca_popular_avg_price':g[g['Marca']==popular_brand]['Precio'].mean()
+        'marca_popular_min_price':g[g['Marca']==popular_brand]['Costo x Unidad'].min(),
+        'marca_popular_avg_price':g[g['Marca']==popular_brand]['Costo x Unidad'].mean()
         
     })
