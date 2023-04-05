@@ -37,11 +37,14 @@ class buscadorDeTiendas:
         productoEncontrado = self.name
         if self.brand is not None:
             productoEncontrado = productoEncontrado + ' Marca: ' + self.brand
+        else:
+            self.brand= pd.NA
         producto = {'Nombre de producto Solicitado':self.product,
         'Dominio':self.domain,
         'Producto Ofrecido': productoEncontrado,
         'Costo x Unidad': self.price,
-        'Link': self.url
+        'Link': self.url,
+        'Marca':self.brand
         #'Cantidad':self.n
         }
         return producto
